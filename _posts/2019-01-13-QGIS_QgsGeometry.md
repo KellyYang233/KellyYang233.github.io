@@ -1,0 +1,93 @@
+---
+layout:     post                    # 使用的布局（不需要改）
+title:      QGIS算法               # 标题 
+subtitle:   QgsGeometry注释说明
+date:       2019-01-13              # 时间
+author:     Kelly Yang                      # 作者
+header-img: img/post-bg-2015.jpg    #这篇文章标题背景图片
+catalog: true                       # 是否归档
+tags:                               #标签
+    - QGIS
+    - QgsGeometry
+---
+
+> 引言：本文主要是对QGIS中QgsGeometry类一些算法进行说明
+
+# 1、概述
+QGIS API 文档：[https://qgis.org/api/classQgsGeometry.html](https://qgis.org/api/classQgsGeometry.html "QgsGeometry类文档")
+
+矢量分析包含关系测试和关系计算两类。
+关系测试是指元素之间有无相关关系。
+关系计算是指元素之间相互关系的确切几何结果。
+
+**来源：**
+[https://blog.csdn.net/sf2gis2/article/details/41630317](https://blog.csdn.net/sf2gis2/article/details/41630317 "矢量分析")
+
+## 1、关系测试
+* 不相交disjoint:由QgsGeometry：：disjoint()实现。
+* 叠置overlaps：相交，但交集只是两个输入元素的一部分。由QgsGeometry：：overlaps()实现
+* 相交intersects：相交，比较宽泛的相交。由QgsGeometry：：intersects()实现
+* 包含contains：由QgsGeometry：：contains()实现
+* 相等equals：由QgsGeometry：：equals()实现。
+* 相切touches：由QgsGeometry：：touches()实现。
+* 内部within:与contains（）相反。由QgsGeometry：：within()实现。
+* 经过crosses：由QgsGeometry：：crosses()实现。
+
+
+## 2、关系计算
+* 并Union：指元素相互合并，相交部分从原元素中独立为单独元素。由QgsGeometry：：difference()+QgsGeometry::intersection()实现。
+* 交Intersection：表示两个几何图形之间共同的部分。交集多用来表示两个区域的重叠区域。由QgsGeometry::intersection()实现。注意：对于凹多边形，计算不准确。
+* 差Difference：表示一个元素与另一个元素的不同之处。由QgsGeometry：：difference()实现。
+* 异或SymmatricDifference：表示两个元素中去除相交的部分。由QgsGeometry：：symDifference()
+* 融合Dissolve:多个元素合并为一个元素。由QgsGeometry：：combine实现。
+* 插值Interpolate：向指定的点按照一定的距离插值，形成一个新点。由由QgsGeometry：：interpolate()实现。
+* 缓冲区Buffer：表示向外缓冲一段距离。由QgsGeometry：：buffer（）实现。
+* 等距线offsetCurve：表示与指定线相等距离的线。由QgsGeometry：：offsetCurve（）实现。
+* 抽稀Simplify：将较多节点的实体减少节点。由QgsGeometry：：simplify（）实现。
+* 加密Densify：将较少节点的实体增加节点。只能将元素点取出后逐个加密实现。
+* 中心点Centroid：当前实体的中心点。由QgsGeometry：：centroid（）实现。
+* 内部点PointOnSurface：因为多边形可能有孔，也可能有飞地，此函数保证返回一个在多边形内部的点。由QgsGeometry：：pointOnSurface（）实现。
+* 外部多边形ConvexHull：外接多边形。由QgsGeometry：：convexHull（）实现。
+
+
+# simplify函数
+```
+QgsGeometry QgsGeometry::simplify( double tolerance ) const
+{
+  if ( !d->geometry )
+  {
+    return QgsGeometry();
+  }
+
+  QgsGeos geos( d->geometry.get() );
+  mLastError.clear();
+  std::unique_ptr< QgsAbstractGeometry > simplifiedGeom( geos.simplify( tolerance, &mLastError ) );
+  if ( !simplifiedGeom )
+  {
+    QgsGeometry result;
+    result.mLastError = mLastError;
+    return result;
+  }
+  return QgsGeometry( std::move( simplifiedGeom ) );
+}
+```
+可见是调用了qgsgeos简化算法，继续：
+```
+QgsAbstractGeometry *QgsGeos::simplify( double tolerance, QString *errorMsg ) const
+ {
+   if ( !mGeos )
+   {
+     return nullptr;
+   }
+   geos::unique_ptr geos;
+   try
+   {
+     geos.reset( GEOSTopologyPreserveSimplify_r( geosinit.ctxt, mGeos.get(), tolerance ) );
+   }
+   CATCH_GEOS_WITH_ERRMSG( nullptr );
+   return fromGeos( geos.get() ).release();
+ }
+```
+可见是调用了GEOSTopologyPreserveSimplify算法，再继续
+[http://www.postgis.net/docs/ST_SimplifyPreserveTopology.html](http://www.postgis.net/docs/ST_SimplifyPreserveTopology.html "简化算法原理")
+[https://geos.osgeo.org/doxygen/classgeos_1_1simplify_1_1DouglasPeuckerSimplifier.html](https://geos.osgeo.org/doxygen/classgeos_1_1simplify_1_1DouglasPeuckerSimplifier.html "DouglasPeucker")
