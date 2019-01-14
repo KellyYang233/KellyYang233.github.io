@@ -212,6 +212,7 @@ if ((Zhangmude[7] == 0) && (Zhangmude[8] == 1)) ap++;
 * 5、连通性检测，Nc=1
 * 6、宽度为2的骨架只能删除一边
 ```
+{% raw %}
 #define GRAY 128
 #define WHITE 255
 #define BLACK 0
@@ -242,9 +243,7 @@ int func_nc8(int *b)
     }
     return (sum);
 }
-```
-```
-{% raw %}
+
 void cvHilditchThin(cv::Mat& src, cv::Mat& dst)
 {
     if(src.type()!=CV_8UC1)
