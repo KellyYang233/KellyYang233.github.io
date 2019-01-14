@@ -257,8 +257,7 @@ void cvHilditchThin(cv::Mat& src, cv::Mat& dst)
     }
 
     //8邻域的偏移量
-    int offset[9][2] = {{0,0},{1,0},{1,-1},{0,-1},{-1,-1},
-                        {-1,0},{-1,1},{0,1},{1,1} };
+    int offset[9][2] = {{0,0},{1,0},{1,-1},{0,-1},{-1,-1},{-1,0},{-1,1},{0,1},{1,1} };
     //四邻域的偏移量
     int n_odd[4] = { 1, 3, 5, 7 };
     int px, py;
@@ -381,5 +380,4 @@ void cvHilditchThin(cv::Mat& src, cv::Mat& dst)
     }while (counter != 0);
 
 }
-```
 
