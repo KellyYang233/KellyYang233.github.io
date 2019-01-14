@@ -172,7 +172,8 @@ void thinimage(Mat &srcimage)//单通道、二值化后的图像
                     {
                         int ap = 0;
                         if ((Zhangmude[1] == 0) && (Zhangmude[2] == 1)) ap++;
-                        if ((Zhangmude[2] == 0) && (Zhangmude[3] == 1)) ap++;
+
+if ((Zhangmude[2] == 0) && (Zhangmude[3] == 1)) ap++;
                         if ((Zhangmude[3] == 0) && (Zhangmude[4] == 1)) ap++;
                         if ((Zhangmude[4] == 0) && (Zhangmude[5] == 1)) ap++;
                         if ((Zhangmude[5] == 0) && (Zhangmude[6] == 1)) ap++;
@@ -211,8 +212,11 @@ if ((Zhangmude[7] == 0) && (Zhangmude[8] == 1)) ap++;
 	（代码中的条件 3&4）
 * 5、连通性检测，Nc=1
 * 6、宽度为2的骨架只能删除一边
-```
+
 {% raw %}
+
+```
+
 #define GRAY 128
 #define WHITE 255
 #define BLACK 0
@@ -381,5 +385,6 @@ void cvHilditchThin(cv::Mat& src, cv::Mat& dst)
     }while (counter != 0);
 
 }
-{% endraw %}
+
 ```
+{% endraw %}
