@@ -241,7 +241,8 @@ int func_nc8(int *b)
     }
     return (sum);
 }
-
+```
+```
 void cvHilditchThin(cv::Mat& src, cv::Mat& dst)
 {
     if(src.type()!=CV_8UC1)
