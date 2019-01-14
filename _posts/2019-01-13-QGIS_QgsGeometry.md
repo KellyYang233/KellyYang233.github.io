@@ -91,3 +91,21 @@ QgsAbstractGeometry *QgsGeos::simplify( double tolerance, QString *errorMsg ) co
 可见是调用了GEOSTopologyPreserveSimplify算法，再继续
 [http://www.postgis.net/docs/ST_SimplifyPreserveTopology.html](http://www.postgis.net/docs/ST_SimplifyPreserveTopology.html "简化算法原理")
 [https://geos.osgeo.org/doxygen/classgeos_1_1simplify_1_1DouglasPeuckerSimplifier.html](https://geos.osgeo.org/doxygen/classgeos_1_1simplify_1_1DouglasPeuckerSimplifier.html "DouglasPeucker")
+
+**概要：**
+geometry ST_SimplifyPreserveTopology(geometry geomA, float tolerance);
+
+**描述：**
+Returns a "simplified" version of the given geometry using the Douglas-Peucker algorithm. Will avoid creating derived geometries (polygons in particular) that are invalid. Will actually do something only with (multi)lines and (multi)polygons but you can safely call it with any kind of geometry. Since simplification occurs on a object-by-object basis you can also feed a GeometryCollection to this function.
+Performed by the GEOS module.
+
+**Douglas-Peucker algorithm**
+道格拉斯-普克算法(Douglas–Peucker algorithm，亦称为拉默-道格拉斯-普克算法、迭代适应点算法、分裂与合并算法)是将曲线近似表示为一系列点，并减少点的数量的一种算法。该算法的原始类型分别由乌尔斯·拉默（Urs Ramer）于1972年以及大卫·道格拉斯（David Douglas）和托马斯·普克（Thomas Peucker）于1973年提出，并在之后的数十年中由其他学者予以完善。
+
+经典的Douglas-Peucker算法描述如下：
+* 在曲线首尾两点A，B之间连接一条直线AB，该直线为曲线的弦；
+* 得到曲线上离该直线段距离最大的点C，计算其与AB的距离d；
+* 比较该距离与预先给定的阈值threshold的大小，如果小于threshold，则该直线段作为曲线的近似，该段曲线处理完毕。
+* 如果距离大于阈值，则用C将曲线分为两段AC和BC，并分别对两段曲线进行1~3的处理。
+* 当所有曲线都处理完毕时，依次连接各个分割点形成的折线，即可以作为曲线的近似。
+![Douglas-peucker](https://raw.githubusercontent.com/KellyYang233/KellyYang233.github.io/master/img/Douglas-Peucker_animated.gif)
