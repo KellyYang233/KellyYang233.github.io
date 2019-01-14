@@ -202,3 +202,182 @@ void thinimage(Mat &srcimage)//单通道、二值化后的图像
     }
 }
 ```
+# 3、Hilditch算法
+ Hilditch细化算法为是串行处理方法的一种,是一种经典的，充分利用`连接数`的算法。其主要原理是每次扫描并删除图像上满足一定的条件的轮廓像素，直到图像上不存在可删除的轮廓像素为止。该方法适用于二值图像，即像素为1的区域为目标区域,像素为0的区域为背景区域的图像。在此算法中，目标像素P若同时满足以下条件即为可删除像素：
+* 1、p的灰度值为1，即p是前景点，不是背景； 
+* 2、P0+P2+P4+P6≤3，（则三个不全为1，否则删除P，会造成图像空心）
+* 3&4、Pk(0≤k≤7)中至少有两个目标像素为1（若只有一个255，则P是图像的某个端点，不能删除否则影响图像性质；若没有255，则p是孤立点，也不能删除）
+	（代码中的条件 3&4）
+* 5、连通性检测，Nc=1
+* 6、宽度为2的骨架只能删除一边
+```
+#define GRAY 128
+#define WHITE 255
+#define BLACK 0
+
+int func_nc8(int *b)
+//端点的连通性检测
+{
+    int n_odd[4] = { 1, 3, 5, 7 };  //四邻域
+    int i, j, sum, d[10];
+
+    for (i = 0; i <= 9; i++) {
+        j = i;
+        if (i == 9) j = 1;
+        if (abs(*(b + j)) == 1)
+        {
+            d[i] = 1;
+        }
+        else
+        {
+            d[i] = 0;
+        }
+    }
+    sum = 0;
+    for (i = 0; i < 4; i++)
+    {
+        j = n_odd[i];
+        sum = sum + d[j] - d[j] * d[j + 1] * d[j + 2];
+    }
+    return (sum);
+}
+
+void cvHilditchThin(cv::Mat& src, cv::Mat& dst)
+{
+    if(src.type()!=CV_8UC1)
+    {
+        printf("只能处理二值或灰度图像\n");
+        return;
+    }
+    //非原地操作时候，copy src到dst
+    if(dst.data!=src.data)
+    {
+        src.copyTo(dst);
+    }
+
+    //8邻域的偏移量
+    int offset[9][2] = {{0,0},{1,0},{1,-1},{0,-1},{-1,-1},
+                        {-1,0},{-1,1},{0,1},{1,1} };
+    //四邻域的偏移量
+    int n_odd[4] = { 1, 3, 5, 7 };
+    int px, py;
+    int b[9];                      //3*3格子的灰度信息
+    int condition[6];              //1-6个条件是否满足
+    int counter;                   //移去像素的数量
+    int i, x, y, copy, sum;
+
+    uchar* img;
+    int width, height;
+    width = dst.cols;
+    height = dst.rows;
+    img = dst.data;
+    int step = dst.step ;
+    do
+    {
+
+        counter = 0;
+
+        for (y = 0; y < height; y++)
+        {
+
+            for (x = 0; x < width; x++)
+            {
+
+                //前面标记为删除的像素，我们置其相应邻域值为-1
+                for (i = 0; i < 9; i++)
+                {
+                    b[i] = 0;
+                    px = x + offset[i][0];
+                    py = y + offset[i][1];
+                    if (px >= 0 && px < width &&    py >= 0 && py <height)
+                    {
+                        // printf("%d\n", img[py*step+px]);
+                        if (img[py*step+px] == WHITE)
+                        {
+                            b[i] = 1;
+                        }
+                        else if (img[py*step+px]  == GRAY)
+                        {
+                            b[i] = -1;
+                        }
+                    }
+                }
+                for (i = 0; i < 6; i++)
+                {
+                    condition[i] = 0;
+                }
+
+                //条件1，是前景点
+                if (b[0] == 1) condition[0] = 1;
+
+                //条件2，是边界点
+                sum = 0;
+                for (i = 0; i < 4; i++)
+                {
+                    sum = sum + 1 - abs(b[n_odd[i]]);
+                }
+                if (sum >= 1) condition[1] = 1;
+
+                //条件3， 端点不能删除
+                sum = 0;
+                for (i = 1; i <= 8; i++)
+                {
+                    sum = sum + abs(b[i]);
+                }
+                if (sum >= 2) condition[2] = 1;
+
+                //条件4， 孤立点不能删除
+                sum = 0;
+                for (i = 1; i <= 8; i++)
+                {
+                    if (b[i] == 1) sum++;
+                }
+                if (sum >= 1) condition[3] = 1;
+
+                //条件5， 连通性检测
+                if (func_nc8(b) == 1) condition[4] = 1;
+
+                //条件6，宽度为2的骨架只能删除1边
+                sum = 0;
+                for (i = 1; i <= 8; i++)
+                {
+                    if (b[i] != -1)
+                    {
+                        sum++;
+                    } else
+                    {
+                        copy = b[i];
+                        b[i] = 0;
+                        if (func_nc8(b) == 1) sum++;
+                        b[i] = copy;
+                    }
+                }
+                if (sum == 8) condition[5] = 1;
+
+                if (condition[0] && condition[1] && condition[2] &&condition[3] && condition[4] && condition[5])
+                {
+                    img[y*step+x] = GRAY; //可以删除，置位GRAY，GRAY是删除标记，但该信息对后面像素的判断有用
+                    counter++;
+                    //printf("----------------------------------------------\n");
+                    //PrintMat(dst);
+                }
+            }
+        }
+
+        if (counter != 0)
+        {
+            for (y = 0; y < height; y++)
+            {
+                for (x = 0; x < width; x++)
+                {
+                    if (img[y*step+x] == GRAY)
+                        img[y*step+x] = BLACK;
+
+                }
+            }
+        }
+
+    }while (counter != 0);
+
+}
+```
