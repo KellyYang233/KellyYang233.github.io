@@ -109,3 +109,4 @@ Performed by the GEOS module.
 * 如果距离大于阈值，则用C将曲线分为两段AC和BC，并分别对两段曲线进行1~3的处理。
 * 当所有曲线都处理完毕时，依次连接各个分割点形成的折线，即可以作为曲线的近似。
 ![Douglas-peucker](https://raw.githubusercontent.com/KellyYang233/KellyYang233.github.io/master/img/Douglas-Peucker_animated.gif)
+
