@@ -314,7 +314,7 @@ void cvHilditchThin(cv::Mat& src, cv::Mat& dst)
                 sum = 0;
                 for (i = 0; i < 4; i++)
                 {
-                    sum = sum + 1 - abs(b[n_odd[i]]);
+		    sum = sum + 1 - abs(b[n_odd[i]]);
                 }
                 if (sum >= 1) condition[1] = 1;
 
@@ -378,6 +378,5 @@ void cvHilditchThin(cv::Mat& src, cv::Mat& dst)
         }
 
     }while (counter != 0);
-
 }
 ```
