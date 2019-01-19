@@ -110,3 +110,24 @@ Performed by the GEOS module.
 * 当所有曲线都处理完毕时，依次连接各个分割点形成的折线，即可以作为曲线的近似。
 ![Douglas-peucker](https://raw.githubusercontent.com/KellyYang233/KellyYang233.github.io/master/img/Douglas-Peucker_animated.gif)
 
+# buffer函数
+**概要**
+缓冲区是指以几何实体为基础，以一定的半径在周围建立起的多边形。用于与周边地物叠加，解决邻近相关性问题。
+
+##形式一
+QgsGeometry 
+buffer (double distance, int segments) const
+**描述**
+Returns a buffer region around this geometry having the given width and with a specified number of segments used to approximate curves. 
+##形式二
+QgsGeometry 
+buffer (double distance, int segments, EndCapStyle endCapStyle, JoinStyle joinStyle, double miterLimit) const
+**描述**
+Returns a buffer region around the geometry, with additional style options. 
+
+* **distance**	buffer distance 
+* **segments**	for round joins, number of segments to approximate quarter-circle 
+* **endCapStyle**	end cap style 
+* **joinStyle**	join style for corners in geometry 
+* **miterLimit**	limit on the miter ratio used for very sharp corners (JoinStyleMiter only)
+
