@@ -131,3 +131,82 @@ Returns a buffer region around the geometry, with additional style options.
 * **joinStyle**	join style for corners in geometry 
 * **miterLimit**	limit on the miter ratio used for very sharp corners (JoinStyleMiter only)
 
+# deletePart函数
+**概要**
+bool QgsGeometry::deletePart(int partNum)
+Deletes part identified by the part number.
+删除一部分
+如果成功返回true
+**代码**
+bool QgsGeometry::deletePart( int partNum )
+
+if ( !d->geometry )
+{
+  return false;
+}
+
+if ( !isMultipart() && partNum < 1 )
+{
+  set( nullptr );
+  return true;
+}
+
+detach();
+bool ok = QgsGeometryEditUtils::deletePart( d->geometry.get(), partNum );
+  return ok;
+} 
+
+继续：
+ol QgsGeometryEditUtils::deletePart( QgsAbstractGeometry *geom, int partNum )
+
+if ( !geom )
+{
+  return false;
+}
+
+QgsGeometryCollection *c = qgsgeometry_cast<QgsGeometryCollection *>( geom );
+if ( !c )
+{
+  return false;
+}
+
+return c->removeGeometry( partNum );
+}
+
+#mergeLines函数
+*（低版本没有哎:)说是QGIS3.0有的）*
+**概要**
+QgsGeometry QgsGeometry::mergeLines ()const
+Returns：a LineString or MultiLineString geometry, with any connected lines joined. An empty geometry will be returned if the input geometry was not a MultiLineString geometry. 
+**代码**
+  QgsGeometry QgsGeometry::mergeLines() const
+  {
+    if ( !d->geometry )
+    {
+      return QgsGeometry();
+    }
+  
+    if ( QgsWkbTypes::flatType( d->geometry->wkbType() ) == QgsWkbTypes::LineString )
+    {
+      // special case - a single linestring was passed
+      return QgsGeometry( *this );
+    }
+  
+    QgsGeos geos( d->geometry.get() );
+    mLastError.clear();
+    QgsGeometry result = geos.mergeLines( &mLastError );
+    result.mLastError = mLastError;
+    return result;
+  }
+
+#fromPolyline函数
+**概要**
+QgsGeometry QgsGeometry::fromPolyline (const QgsPolyline & polyline)
+
+Creates a new LineString geometry from a list of QgsPoint points. 
+This method will respect any Z or M dimensions present in the input points. E.g. if input points are PointZ type, the resultant linestring will be a LineStringZ type.
+
+ QgsGeometry QgsGeometry::fromPolyline( const QgsPolyline &polyline )
+ {
+   return QgsGeometry( qgis::make_unique< QgsLineString >( polyline ) );
+ }
