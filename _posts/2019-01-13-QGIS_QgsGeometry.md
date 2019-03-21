@@ -114,12 +114,12 @@ Performed by the GEOS module.
 **概要**
 缓冲区是指以几何实体为基础，以一定的半径在周围建立起的多边形。用于与周边地物叠加，解决邻近相关性问题。
 
-##形式一
+## 形式一
 QgsGeometry 
 buffer (double distance, int segments) const
 **描述**
 Returns a buffer region around this geometry having the given width and with a specified number of segments used to approximate curves. 
-##形式二
+## 形式二
 QgsGeometry 
 buffer (double distance, int segments, EndCapStyle endCapStyle, JoinStyle joinStyle, double miterLimit) const
 **描述**
@@ -173,7 +173,7 @@ if ( !c )
 return c->removeGeometry( partNum );
 }
 
-#mergeLines函数
+# mergeLines函数
 *（低版本没有哎:)说是QGIS3.0有的）*
 **概要**
 QgsGeometry QgsGeometry::mergeLines ()const
@@ -199,7 +199,7 @@ Returns：a LineString or MultiLineString geometry, with any connected lines joi
     return result;
   }
 
-#fromPolyline函数
+# fromPolyline函数
 **概要**
 QgsGeometry QgsGeometry::fromPolyline (const QgsPolyline & polyline)
 
@@ -210,3 +210,17 @@ This method will respect any Z or M dimensions present in the input points. E.g.
  {
    return QgsGeometry( qgis::make_unique< QgsLineString >( polyline ) );
  }
+
+# combine函数
+**概要**
+QgsGeometry 
+combine (const QgsGeometry &geometry) const
+ 也就是Union操作，联合操作
+Returns a geometry representing all the points in this geometry and other (a union geometry operation)
+
+If the input is a NULL geometry, the output will also be a NULL geometry.
+如果输入为空，输出为空。
+If an error was encountered while creating the result, more information can be retrieved by calling error() on the returned geometry.
+如果输出结果的时候出现错误，可以通过调用error()来获得更多的信息。
+**Note**
+this operation is not called union since its a reserved word in C++. 
