@@ -1,6 +1,6 @@
 ---
 layout:     post                    # 使用的布局（不需要改）
-title:      anaconda+vscode+tensorflow               # 标题 
+title:      anaconda-vscode-tensorflow安装 # 标题 
 subtitle:   
 date:       2019-06-21              # 时间
 author:     Kelly Yang                      # 作者
